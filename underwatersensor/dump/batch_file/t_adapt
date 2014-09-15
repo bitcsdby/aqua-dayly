@@ -1,0 +1,7 @@
+#            node   width  maxspeed minspeed pos_interval total-time
+for((j=500;j<=3000;j=j+100));do
+for ((i=0;i<100;i++)) ;do 
+ns t_4.tcl $j   20      3     3   0.3  200  self_adaptation.data
+done
+done
+

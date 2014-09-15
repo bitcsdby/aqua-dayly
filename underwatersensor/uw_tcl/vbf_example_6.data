@@ -1,0 +1,7 @@
+New simulation....
+nodes  = 360, maxspeed = 3, minspeed = 0.2, random_seed = 10, sending_interval_=10.0, width=100
+x= 500 y= 500 z= 500
+SINK(1) : num_send = 50, num_recv = 0, cum_delay = 0.000000
+SINK(0) : num_send = 0, num_recv = 30, cum_delay = 176.679003
+SINK(0) : send_id = 1, num_recv = 30
+God : consumped_energy = 2349.226402

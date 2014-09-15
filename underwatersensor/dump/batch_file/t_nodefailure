@@ -1,0 +1,7 @@
+#node width maxspeed minspeed pos_interval total-time node-failure-pro filename
+
+for ((k=1;k<=50;k++)) ;do 
+for ((i=0;i<100;i++)) ;do 
+ns t_nodefailure.tcl 1500 20  3  3  0.3  200 $k  t_nodefailure.data
+done
+done

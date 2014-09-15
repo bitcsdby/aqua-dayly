@@ -1,0 +1,151 @@
+
+//#include "delay.h"
+//#include "connector.h"
+
+#include "packet.h"
+#include "random.h"
+#include "underwatersensor/uw_common/underwatersensornode.h"
+#include "mac.h"
+#include "underwaterbroadcastmac.h"
+#include "underwaterphy.h"
+
+
+StatusHandler:: StatusHandler(UnderwaterBroadcastMac*  p):mac_(p){}
+void StatusHandler::handle(Event* e)
+{
+  mac_->StatusProcess(e);
+}
+
+BackoffHandler::BackoffHandler(UnderwaterBroadcastMac* p):mac_(p){}
+
+void BackoffHandler::handle(Event* e)
+{
+  mac_->TxProcess((Packet*)e);
+}
+
+
+/* ======================================================================
+   Broadcast MAC for  underwater sensor
+   ====================================================================== */
+static class UnderwaterBroadcastMacClass : public TclClass {
+public:
+ UnderwaterBroadcastMacClass():TclClass("Mac/UnderwaterMac/UnderwaterBroadcastMac") {}
+   TclObject* create(int, const char*const*) {
+	  return (new UnderwaterBroadcastMac());
+   }
+} class_underwaterbroadcastmac;
+
+
+UnderwaterBroadcastMac::UnderwaterBroadcastMac() : UnderwaterMac(),status_handler(this),backoff_handler(this)
+{
+  bind("packet_size_",&packet_size_); 
+}
+
+/*
+ this program is used to handle the received packet, 
+it should be virtual function, different class may have 
+different versions.
+*/
+
+void 
+UnderwaterBroadcastMac::RecvProcess(Packet* pkt){
+  char* mh=(char*)pkt->access(hdr_mac::offset_);
+  assert(initialized());
+  int dst=this->hdr_dst(mh);
+
+  if(dst==MAC_BROADCAST){
+printf("underwaterbroadcastmac:a broadcast packet\n");
+    uptarget_->recv(pkt, this);
+    return;
+  }
+
+   if(dst==index_){
+printf("underwaterbroadcastmac:this is my packet \n");
+    uptarget_->recv(pkt, this);
+    return;
+}
+   printf("underwaterbroadcastmac: this is neither broadcast nor my packet, just drop it\n");
+   Packet::free(pkt);
+   return;
+}
+
+/*
+ this program is used to handle the transmitted packet, 
+it should be virtual function, different class may have 
+different versions.
+*/
+
+void 
+UnderwaterBroadcastMac::TxProcess(Packet* pkt){
+  hdr_cmn* cmh=HDR_CMN(pkt);
+  assert(initialized());
+  UnderwaterSensorNode* n=(UnderwaterSensorNode*) node_;
+
+   cmh->size()=packet_size_;
+   hdr_cmn::access(pkt)->txtime()=(cmh->size()*encoding_efficiency_)/bit_rate_;
+   double txtime=hdr_cmn::access(pkt)->txtime();
+
+  if(SLEEP==n->TransmissionStatus()) {
+  Poweron();
+  n->SetTransmissionStatus(SEND);
+
+  cmh->next_hop()=MAC_BROADCAST;
+  cmh->direction()=hdr_cmn::DOWN; 
+  cmh->addr_type()=NS_AF_ILINK;
+  sendDown(pkt);
+
+  Scheduler& s=Scheduler::instance();
+  s.schedule(&status_handler,&status_event,txtime);
+  return;
+  }
+
+  if(IDLE==n->TransmissionStatus()){
+  n->SetTransmissionStatus(SEND);
+  cmh->next_hop()=MAC_BROADCAST;
+  cmh->direction()=hdr_cmn::DOWN; 
+  cmh->addr_type()=NS_AF_ILINK;
+  sendDown(pkt);
+
+  Scheduler& s=Scheduler::instance();
+  s.schedule(&status_handler,&status_event,txtime);
+  return;
+  }
+  
+  if((RECV==n->TransmissionStatus())||(SEND==n->TransmissionStatus()))
+    {
+      Scheduler& s=Scheduler::instance();
+      double backoff=Random::uniform()*BACKOFF;
+      s.schedule(&backoff_handler,(Event*) pkt,backoff);
+      return;
+    }
+}
+
+
+void 
+UnderwaterBroadcastMac::StatusProcess(Event* p){
+UnderwaterSensorNode* n=(UnderwaterSensorNode*) node_;
+ if(SLEEP==n->TransmissionStatus()) return;
+ n->SetTransmissionStatus(IDLE);
+}
+
+
+
+int
+UnderwaterBroadcastMac::command(int argc, const char*const* argv)
+{
+
+
+     if(argc == 3) {
+		TclObject *obj;
+                 if (strcmp(argv[1], "node_on") == 0) {
+		   Node* n1=(Node*) TclObject::lookup(argv[2]);
+		   if (!n1) return TCL_ERROR;
+		   node_ =n1; 
+		   return TCL_OK;
+		 }
+     }
+
+	return UnderwaterMac::command(argc, argv);
+}
+
+

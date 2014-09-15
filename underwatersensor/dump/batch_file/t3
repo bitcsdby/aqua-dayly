@@ -1,0 +1,55 @@
+#            node   width  maxspeed minspeed pos_interval total-time
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      2     2      0.5  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      3      3       0.2  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      4      4       0.2  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      5      5       0.2  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      6      6       0.1  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      7      7       0.1  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      8      8       0.1  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      9      9       0.1  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 3000   20      10      10       0.1  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 1000   20      10      0       0.1  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 2000   20      10      0       0.1  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 3000   20      10      0       0.1  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 4000   20      10      0       0.1  200
+done
+for ((i=1;i<=1;i++)) ;do 
+ns t_4.tcl 5000   20      10      0       0.1  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 1000   20      2      2       0.5  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 2000   20      2      2       0.5  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 3000   20      2      2       0.5  200
+done
+for ((i=1;i<=3;i++)) ;do 
+ns t_4.tcl 4000   20      2      2       0.5  200
+done

@@ -1,0 +1,23 @@
+
+
+#ifndef ns_uw_hash_table_h
+#define ns_uw_hash_table_h
+
+#include "config.h"
+#include "tclcl.h"
+
+class UW_Hash_Table {
+ public:
+  Tcl_HashTable htable;
+
+   UW_Hash_Table() {
+    Tcl_InitHashTable(&htable,TCL_ONE_WORD_KEYS);
+  }
+
+  void reset();
+  void Display();
+  void PutInHash(int addr);
+  int*  GetHash(int addr);
+};
+
+#endif

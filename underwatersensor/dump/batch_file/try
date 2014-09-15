@@ -1,0 +1,6 @@
+for((j=500;j<=3000;j=j+100));do
+for ((i=0;i<100;i++)) ;do
+a=[expr $j + 10]
+echo $a
+done
+done

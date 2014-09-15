@@ -1,0 +1,69 @@
+
+#include "tclcl.h"
+#include "uw_hash_table.h"
+
+
+void UW_Hash_Table::reset()
+{
+  Tcl_HashEntry *entryPtr;
+  Tcl_HashSearch searchPtr;
+
+  entryPtr = Tcl_FirstHashEntry(&htable, &searchPtr);
+  while (entryPtr != NULL) {
+    Tcl_DeleteHashEntry(entryPtr);
+    entryPtr = Tcl_NextHashEntry(&searchPtr);
+  }
+}
+
+
+void UW_Hash_Table::Display()
+{
+  Tcl_HashEntry *entryPtr;
+  Tcl_HashSearch searchPtr;
+  int* p1;
+  int* p2;
+
+  entryPtr = Tcl_FirstHashEntry(&htable, &searchPtr);
+  while (entryPtr != NULL) {
+      p2=(int*) Tcl_GetHashKey(&htable,entryPtr);     
+      p1= (int*)Tcl_GetHashValue(entryPtr);
+   if(p1&&p2)  printf("node %d   number %d\n",*p2,*p1); 
+    entryPtr = Tcl_NextHashEntry(&searchPtr);
+  }
+ 
+}
+
+
+
+int*  UW_Hash_Table::GetHash(int  addr)
+{
+  int addr1=addr;
+  return (int*) Tcl_FindHashEntry(&htable, (char *)&addr1);
+}
+
+
+void UW_Hash_Table::PutInHash(int addr)
+{
+    int newPtr;
+
+    int addr1=addr;
+    int*  val=new int[2];
+     val[0]=1;
+     val[1]=addr;
+Tcl_HashEntry* entryPtr=Tcl_FindHashEntry(&htable, (char *)&addr1);
+ if(entryPtr){
+
+        int* val1=GetHash(addr1);  
+	// if(!val1) {printf("the returned value is empty\n"); return;}
+        int* add2=(int*)Tcl_GetHashKey(&htable,entryPtr);   
+   printf("uw_hash_table: !!!!!!this is not new old value is%d %d \n",*add2,*val1); 
+        Tcl_SetHashValue(entryPtr, val);  
+ }
+ else 
+   {
+      entryPtr=Tcl_CreateHashEntry(&htable, (char *)&addr1, &newPtr);
+       
+      Tcl_SetHashValue(entryPtr,val);   
+   }
+    return;   
+}

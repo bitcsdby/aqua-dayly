@@ -1,0 +1,61 @@
+
+
+#ifndef ns_underwaterbroadcastmac_h
+#define ns_underwaterbroadcastmac_h
+
+#include "underwatermac.h"
+
+
+
+#define BACKOFF  0.1 // the maximum time period for backoff
+class UnderwaterBroadcastMac;
+
+class StatusHandler: public Handler{
+ public:
+  StatusHandler(UnderwaterBroadcastMac*);
+  void handle(Event*);
+ private:
+  UnderwaterBroadcastMac* mac_;
+};
+
+
+class BackoffHandler: public Handler{
+ public:
+  BackoffHandler(UnderwaterBroadcastMac*);
+  void handle(Event*);
+ private:
+  UnderwaterBroadcastMac* mac_;
+};
+
+class UnderwaterBroadcastMac: public UnderwaterMac {
+   
+public:
+        UnderwaterBroadcastMac();
+     
+      	int  command(int argc, const char*const* argv);
+        int packet_size_;
+
+        Event backoff_event;
+        Event status_event;
+        StatusHandler status_handler;
+        BackoffHandler backoff_handler; 
+
+        //Node* node(void) const {return node_;}
+        // to process the incomming packet
+        virtual  void RecvProcess(Packet*);
+        void StatusProcess(Event*);
+
+       // to process the outgoing packet
+        virtual  void TxProcess(Packet*);
+
+protected:        
+	inline int initialized() {
+	return  UnderwaterMac::initialized();
+	}
+ private:
+        friend class StatusHandler;
+        friend class BackoffHandler;
+};
+
+#endif /* __uwbroadcastmac_h__ */
+

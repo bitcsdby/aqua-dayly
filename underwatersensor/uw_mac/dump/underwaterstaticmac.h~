@@ -1,0 +1,117 @@
+#ifndef ns_uwstaticmac_h
+#define ns_uwstaticmac_h
+
+
+#include "address.h"
+#include "ip.h"
+
+#include "mac-timers.h"
+#include "marshall.h"
+
+enum PacketStatus{RECEPTION,COLLISION,/*SENSED,*/ INVALID};
+struct IncommingPacket{
+  Packet* pakcet;
+  PacketStatus status;
+  IncommingPacket* next;
+}
+
+
+
+class IncommingChannel{
+ public: 
+       IncommingChannel(){
+                  head_=NULL; 
+                  num_of_active_incomming_packet=0;
+                  TotalSignakStrength=0;
+                          };
+      
+    void AddNewPacket(Packet*);
+    int  DeletePacket(Packet*);
+    PacketStatus PacketStatus();
+    int num_of_active_incomimng_packet;// number of incomming packets
+    double TotalSignalStrength;// total amount of incomming transmission power
+ private:
+        Incommingpacket* head;
+        void UpdatePacketStatus();
+};
+
+
+Class RecvHandler: public Handler{
+ public:
+  RecvHandler(UwStaticMac* p):mac(p){}
+  void handle(Event*);
+ private:
+  UnderwaterPhy* mac;
+}
+
+class UwStaticMac: public Mac {
+
+public:
+
+        PacketQueue tx_buffer;
+        InCommingChannel recv_channel;
+        RecvHandler recv_handler;
+        void RecvProcess();
+
+
+protected:
+
+private:
+	int		command(int argc, const char*const* argv);
+
+	/*
+	 * Called by the timers.
+	 */
+	void		recv_timer(void);
+	void		send_timer(void);
+	int		check_pktCTRL();
+	int		check_pktRTS();
+	int		check_pktTx();
+
+	/*
+	 * Packet Transmission Functions.
+	 */
+	void	send(Packet *p, Handler *h);
+	void 	sendRTS(int dst);
+	void	sendCTS(int dst, double duration);
+	void	sendACK(int dst);
+	void	sendDATA(Packet *p);
+	void	RetransmitRTS();
+	void	RetransmitDATA();
+
+	/*
+	 * Packet Reception Functions.
+	 */
+	void	recvRTS(Packet *p);
+	void	recvCTS(Packet *p);
+	void	recvACK(Packet *p);
+	void	recvDATA(Packet *p);
+
+
+	inline int initialized() {
+	return (cache_ && logtarget_
+                        && Mac::initialized());
+
+	}
+
+	// change wrt Mike's code
+	/*
+	void mac_log(Packet *p) {
+		logtarget_->recv(p, (Handler*) 0);
+	}*/
+
+	inline void mac_log(Packet *p) {
+                logtarget_->recv(p, (Handler*) 0);
+        }
+
+
+
+protected:
+
+
+private:
+
+};
+
+#endif /* __uwstaticmac_h__ */
+
